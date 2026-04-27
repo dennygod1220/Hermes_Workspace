@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h2>TradingView 截圖分析</h2>
+
+    <div class="info-bar" id="priceInfo">
+      <span id="symbolDisplay">--</span>
+      <span id="priceDisplay">--</span>
+    </div>
+
+    <form id="tradeForm">
+      <div class="field">
+        <label>方向</label>
+        <div class="btn-group">
+          <button type="button" class="btn-long active" data-value="long">做多 📈</button>
+          <button type="button" class="btn-short" data-value="short">做空 📉</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="entryPrice">進場價位</label>
+        <input type="text" id="entryPrice" placeholder="自動抓取或手動輸入">
+      </div>
+
+      <div class="field-row">
+        <div class="field half">
+          <label for="stopLoss">停損</label>
+          <input type="text" id="stopLoss" placeholder="價位">
+        </div>
+        <div class="field half">
+          <label for="takeProfit">目標</label>
+          <input type="text" id="takeProfit" placeholder="價位">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="notes">備註</label>
+        <textarea id="notes" rows="2" placeholder="技術面觀察、交易理由..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>附帶指標</label>
+        <div class="check-group">
+          <label><input type="checkbox" id="vrvpCheck" checked> VRVP</label>
+          <label><input type="checkbox" id="emaCheck" checked> EMA 20/30/60</label>
+          <label><input type="checkbox" id="kdjCheck" checked> KDJ</label>
+          <label><input type="checkbox" id="ppoCheck"> PPO</label>
+          <label><input type="checkbox" id="stochRsiCheck" checked> Stoch RSI</label>
+        </div>
+      </div>
+
+      <button type="button" class="btn-capture" id="captureBtn">
+        📸 截圖分析
+      </button>
+    </form>
+
+    <div id="status" class="status hidden"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

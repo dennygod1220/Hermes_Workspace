@@ -1,0 +1,140 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  width: 340px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  padding: 0;
+}
+
+.container { padding: 16px; }
+
+h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.info-bar {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+#symbolDisplay { color: #8899aa; }
+#priceDisplay { color: #4ade80; font-weight: 700; font-size: 15px; }
+
+.field { margin-bottom: 10px; }
+
+.field-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.field.half { flex: 1; margin-bottom: 0; }
+
+label {
+  display: block;
+  font-size: 12px;
+  color: #8899aa;
+  margin-bottom: 4px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 7px 10px;
+  background: #0d1b2a;
+  border: 1px solid #1b2838;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus, textarea:focus {
+  border-color: #4ade80;
+}
+
+textarea { resize: vertical; font-family: inherit; }
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+.btn-group button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #1b2838;
+  border-radius: 4px;
+  background: #0d1b2a;
+  color: #8899aa;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.btn-group button.active {
+  border-color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  color: #4ade80;
+}
+.btn-short.active {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.check-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.check-group label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #8899aa;
+  cursor: pointer;
+}
+.check-group input[type="checkbox"] {
+  width: auto;
+}
+
+.btn-capture {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #0f3460, #533483);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-capture:hover { opacity: 0.9; }
+.btn-capture:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  text-align: center;
+}
+.status.success { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid #4ade80; }
+.status.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
+.status.info { background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid #60a5fa; }
+.status.hidden { display: none; }
