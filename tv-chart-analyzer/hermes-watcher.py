@@ -6,7 +6,8 @@ Trading Screenshot Watcher
 使用方式:
   python3 hermes-watcher.py [--latest]   # 顯示最新一筆 (預設)
   python3 hermes-watcher.py --watch      # 監聽模式
-  python3 hermes-watcher.py --import     # 從 Downloads 匯入 tv_* 截圖至 screenshots/
+  python3 hermes-watcher.py --import     # 從 Downloads 匯入 tv_* 截圖至 screenshots/ + 同步到 wiki
+  python3 hermes-watcher.py --archive-wiki  # 複製最新截圖到 wiki trading/screenshots/
 """
 
 import json
@@ -21,6 +22,13 @@ SCREENSHOT_DIR = Path(os.environ.get(
     '/mnt/c/Users/denny/Downloads/Hermes_Workspace/tv-chart-analyzer/screenshots'
 ))
 DOWNLOADS_DIR = Path('/mnt/c/Users/denny/Downloads')
+
+# Wiki trading screenshots directory (copy for documentation reference)
+WIKI_PATH = Path(os.environ.get(
+    'WIKI_PATH',
+    '/mnt/c/Users/denny/Downloads/SillyTavern/koboldcpp-config/AI_Brain'
+))
+WIKI_SCREENSHOT_DIR = WIKI_PATH / 'trading' / 'screenshots'
 
 
 def get_latest_pair():
@@ -71,8 +79,36 @@ def format_summary(meta):
     return '\n'.join(lines)
 
 
+def archive_to_wiki(png_path=None, json_path=None):
+    """Copy the latest screenshot pair to wiki trading/screenshots/ for documentation."""
+    WIKI_SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
+
+    if not png_path:
+        png_path, json_path = get_latest_pair()
+
+    if not png_path:
+        print("❌ 沒有找到截圖可歸檔到 wiki")
+        return
+
+    dst_png = WIKI_SCREENSHOT_DIR / png_path.name
+    if dst_png.exists():
+        print(f"⏭ Wiki 已存在: {png_path.name}")
+    else:
+        shutil.copy2(str(png_path), str(dst_png))
+        print(f"📸 複製到 wiki: {dst_png}")
+        print(f"   引用方式: ![[{png_path.name}]]")
+
+    if json_path:
+        dst_json = WIKI_SCREENSHOT_DIR / json_path.name
+        if dst_json.exists():
+            print(f"⏭ Wiki 已存在: {json_path.name}")
+        else:
+            shutil.copy2(str(json_path), str(dst_json))
+            print(f"📄 複製到 wiki: {dst_json}")
+
+
 def import_from_downloads():
-    """Move tv_* files from Downloads/ to screenshots/ directory"""
+    """Move tv_* files from Downloads/ to screenshots/ directory, and copy to wiki."""
     tv_pngs = sorted(DOWNLOADS_DIR.glob('tv_*.png'), key=os.path.getmtime)
     if not tv_pngs:
         print("❌ Downloads 中沒有 tv_* 截圖")
@@ -98,12 +134,24 @@ def import_from_downloads():
 
     print(f"\n📦 共匯入 {count} 組截圖到 {SCREENSHOT_DIR}")
 
+    # Also copy to wiki for documentation
+    if count > 0:
+        print(f"\n📋 同步到 wiki trading/screenshots/ ...")
+        for png in tv_pngs[:count]:
+            json_src = SCREENSHOT_DIR / (png.stem + '.json')
+            json_path = json_src if json_src.exists() else None
+            archive_to_wiki(SCREENSHOT_DIR / png.name, json_path)
+
 
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else '--latest'
 
     if mode == '--import':
         import_from_downloads()
+        return
+
+    if mode == '--archive-wiki':
+        archive_to_wiki()
         return
 
     if mode == '--watch':
