@@ -25,3 +25,23 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Secrets — 萬用排除,任何層級都生效(含點開頭的 .env)
+*.env
+*.env.*
+!.env.example
+*.pem
+*.key
+ssh_keys/
+
+# 金鑰資料夾(集中管理用)
+金鑰_keys/
+
+# Nested git repo(有自己的遠端 j7708git/vastai,金鑰由其自身 .gitignore 管理)
+comfyui_docker/
+
+# Games (large)
+遊戲/
+
+# Temp scratch files
+暫存_temp/

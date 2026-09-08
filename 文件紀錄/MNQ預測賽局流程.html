@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MNQ 預測賽局 — 遊戲流程與規則</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #171a23;
+    --border: #2a2f3d;
+    --text: #e2e6ef;
+    --muted: #8b93a7;
+    --accent: #5eead4;
+    --accent2: #818cf8;
+    --warn: #fbbf24;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+    line-height: 1.75;
+    padding: 48px 24px 80px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  h1 { font-size: 2rem; margin-bottom: 4px; letter-spacing: 0.5px; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); margin-bottom: 36px; font-size: 0.95rem; }
+  h2 {
+    font-size: 1.25rem; margin: 44px 0 16px;
+    padding-left: 12px; border-left: 4px solid var(--accent2);
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px; margin-bottom: 16px;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.85rem; }
+  tr:last-child td { border-bottom: none; }
+  code {
+    background: #1e2330; border: 1px solid var(--border);
+    border-radius: 5px; padding: 1px 7px; font-size: 0.88em;
+    font-family: Consolas, monospace; color: var(--accent);
+  }
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: flex; gap: 16px; position: relative; padding-bottom: 28px;
+  }
+  .step:last-child { padding-bottom: 0; }
+  .step::before {
+    content: ""; position: absolute; left: 17px; top: 38px; bottom: 0;
+    width: 2px; background: var(--border);
+  }
+  .step:last-child::before { display: none; }
+  .num {
+    flex: 0 0 36px; height: 36px; border-radius: 50%;
+    background: var(--card); border: 2px solid var(--accent2);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--accent2); z-index: 1;
+  }
+  .step.user .num { border-color: var(--warn); color: var(--warn); }
+  .step h3 { font-size: 1.02rem; margin-bottom: 4px; }
+  .step p { color: var(--muted); font-size: 0.93rem; }
+  .step .who {
+    display: inline-block; font-size: 0.72rem; padding: 1px 8px;
+    border-radius: 999px; border: 1px solid var(--border);
+    color: var(--muted); margin-left: 8px; vertical-align: 1px;
+  }
+  .tag { display: inline-block; font-size: 0.75rem; padding: 2px 10px; border-radius: 999px; margin-right: 6px; font-weight: 600; }
+  .tag.you { background: rgba(251,191,36,.12); color: var(--warn); border: 1px solid rgba(251,191,36,.4); }
+  .tag.ref { background: rgba(129,140,248,.12); color: var(--accent2); border: 1px solid rgba(129,140,248,.4); }
+  .tag.player { background: rgba(94,234,212,.1); color: var(--accent); border: 1px solid rgba(94,234,212,.4); }
+  .rule { display: flex; gap: 12px; margin-bottom: 12px; }
+  .rule:last-child { margin-bottom: 0; }
+  .rule .icon { flex: 0 0 auto; }
+  .note {
+    border-left: 3px solid var(--warn); background: rgba(251,191,36,.06);
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 16px;
+    font-size: 0.92rem;
+  }
+  .paths td:first-child { white-space: nowrap; }
+  .footer { margin-top: 56px; color: var(--muted); font-size: 0.82rem; text-align: center; }
+  b.strong { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>MNQ 預測賽局 <span>·</span> 流程與規則</h1>
+  <p class="sub">Hermes Bot Mode 多 bot 賽局 · 建立於 2026-09-07 · 協議文件</p>
+
+  <h2>角色與職掌</h2>
+  <div class="card">
+    <table>
+      <tr><th style="width:170px">成員</th><th>角色</th><th style="width:220px">模型 / 位置</th></tr>
+      <tr>
+        <td><span class="tag you">你</span>dennygod1220</td>
+        <td>發牌員兼觀眾：丟截圖、回報結算、看戰報</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="tag ref">裁判</span>mnq-ref</td>
+        <td>流程中樞：隔離圖片、平行派發、轉發辯論、評分、揭曉答案。全程中立，不參與行情判斷。</td>
+        <td>qwen/qwen3.7-flash<br>Desktop Bot Chat</td>
+      </tr>
+      <tr>
+        <td><span class="tag player">玩家 A</span>qwen38-flash</td>
+        <td>預測、辯論、檢討、維護自己的策略筆記</td>
+        <td>qwen/qwen3.8-flash（視覺）</td>
+      </tr>
+      <tr>
+        <td><span class="tag player">玩家 B</span>glm53-flash</td>
+        <td>預測、辯論、檢討、維護自己的策略筆記</td>
+        <td>z-ai/glm-5.3-flash（視覺）</td>
+      </tr>
+    </table>
+    <div class="note">
+      💡 另有 <code>chair</code>（Discord 群房「MNQ預測分析」的主席/計分員）與 <code>bot_father</code>（bot 管理專責窗口）。本賽局的主戰場是 mnq-ref 的 Bot Chat，不走 Discord 群房——<code>message_agent</code> 只存在於 canonical Bot Chat，速度也比群房串行快（真平行）。
+    </div>
+  </div>
+
+  <h2>一輪的完整流程</h2>
+  <div class="card">
+    <div class="flow">
+      <div class="step user">
+        <div class="num">1</div>
+        <div>
+          <h3>開局 <span class="who">你 → mnq-ref</span></h3>
+          <p>把 TradingView 開盤截圖拖進 mnq-ref 的 Bot Chat，說「開新的一局」。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <h3>隔離與派發 <span class="who">mnq-ref</span></h3>
+          <p>裁判把截圖<b>複製</b>到本輪專屬資料夾（隨機檔名），然後在同一輪回覆中連發兩則 <code>message_agent</code>，平行派發預測任務給兩位玩家。派發訊息明令：只准開指定路徑，禁止逛資料夾或讀其他檔案。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <h3>獨立預測 <span class="who">兩位玩家（平行）</span></h3>
+          <p>各自先讀自己的 <code>mnq_strategy.md</code> 策略筆記，再 <code>vision_analyze</code> 看圖作答。回覆格式固定：</p>
+          <p style="margin-top:8px"><code>基準價: n</code> ／ <code>區間: 低-高</code> ／ <code>理由: 三句以內</code></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <h3>互看辯論（固定一輪） <span class="who">mnq-ref ⇄ 玩家</span></h3>
+          <p>裁判收齊兩份預測後交叉轉發（只到收齊才轉，嚴禁搶跑）。玩家同意就確認，不同意就指出對方錯誤並決定維持或修正區間。不開第二輪。</p>
+        </div>
+      </div>
+      <div class="step user">
+        <div class="num">5</div>
+        <div>
+          <h3>等待結算 <span class="who">15–20 分鐘</span></h3>
+          <p>裁判回報「預測已定，等結算」。這段是預測窗口，雙方區間已定案，純等待。</p>
+        </div>
+      </div>
+      <div class="step user">
+        <div class="num">6</div>
+        <div>
+          <h3>結算 <span class="who">你 → mnq-ref</span></h3>
+          <p>時間到，丟結算截圖（或直接打數字更快，例如「結算 24537.25」）。裁判讀出收盤價、與你確認後評分。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">7</div>
+        <div>
+          <h3>評分與戰報 <span class="who">mnq-ref → 你</span></h3>
+          <p>計分規則：最終區間<b>涵蓋</b>結算價 = 1 分，未涵蓋 = 0 分；同分時區間較窄者勝。輸出固定格式戰報（🏁 第 N 輪結果 + 累積戰績），結果寫入裁判記憶。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">8</div>
+        <div>
+          <h3>揭曉與檢討（學習核心） <span class="who">mnq-ref → 玩家</span></h3>
+          <p>裁判把結算價、雙方預測對照、結算截圖（同樣隔離處理）發給兩位玩家。各自看圖對照判斷，分析「為何對/為何錯、漏了什麼訊號、對手有何可取」，把結論寫入自己的 <code>mnq_strategy.md</code>。檢討回覆不互轉——筆記才是學習載體。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>學習迴圈</h2>
+  <div class="card">
+    <p style="margin-bottom:14px">本遊戲的設計目的不是單純比賽，而是讓兩位玩家透過反覆的循環，累積對 MNQ 走勢特性的理解，讓預測成功率越來越高：</p>
+    <div class="rule"><span class="icon">🔁</span><div><b class="strong">預測前</b> — 讀 <code>mnq_strategy.md</code>：上次累積的教訓優先於直覺。</div></div>
+    <div class="rule"><span class="icon">💬</span><div><b class="strong">辯論中</b> — 互相檢視對方理由，修正或堅持自己的判斷。</div></div>
+    <div class="rule"><span class="icon">🏁</span><div><b class="strong">結算後</b> — 看答案盤面，誠實檢討（錯了就承認，不事後合理化）。</div></div>
+    <div class="rule"><span class="icon">📝</span><div><b class="strong">沉澱</b> — 把結論寫進筆記：走勢特性觀察、有效/失效訊號清單（驗證後更新狀態）、常犯錯誤與對策、不確定事項標注「待驗證」。寫累積的規律，不寫單輪流水帳。</div></div>
+  </div>
+
+  <h2>防作弊設計</h2>
+  <div class="card">
+    <div class="rule"><span class="icon">🔒</span><div><b class="strong">作答階段（0–2）實體隔離</b> — 每輪截圖複製到隨機命名的專屬資料夾（<code>rounds/round-N-隨機短碼/隨機檔名.png</code>），玩家拿到的資料夾裡只有一張圖。就算無視「禁止逛資料夾」的軟指令，也無東西可偷。來源資料夾（含回放批次圖）絕不向玩家透露存在。</div></div>
+    <div class="rule"><span class="icon">🎓</span><div><b class="strong">結算階段（3–4）主動透明</b> — 學習優先：結算後裁判主動揭曉答案給玩家，作答時的隔離不影響結算後的學習。</div></div>
+    <div class="rule"><span class="icon">🎬</span><div><b class="strong">回放模式的順序保證</b> — 一次排多輪回放時，<b>全部輪次先各自獨立答完（階段 0–2）</b>，再一次依序執行揭曉（階段 3–4）。絕不在尚有未答輪次時揭曉任何結算，避免玩家看到下一輪的未來（lookahead bias）。</div></div>
+  </div>
+
+  <h2>關鍵檔案與位置</h2>
+  <div class="card">
+    <table class="paths">
+      <tr><th>項目</th><th>路徑 / 說明</th></tr>
+      <tr><td>裁判協議</td><td><code>C:\Users\denny\AppData\Local\hermes\profiles\mnq-ref\SOUL.md</code></td></tr>
+      <tr><td>玩家協議</td><td><code>profiles\qwen38-flash\SOUL.md</code>、<code>profiles\glm53-flash\SOUL.md</code>（同上層級）</td></tr>
+      <tr><td>玩家策略筆記</td><td>各玩家 workspace 下的 <code>mnq_strategy.md</code>（自動產生，跨輪次累積）</td></tr>
+      <tr><td>每輪隔離資料夾</td><td>裁判 workspace 下的 <code>rounds/round-N-&lt;隨機短碼&gt;/</code></td></tr>
+      <tr><td>賽局歷史</td><td>mnq-ref 的 Bot Chat（完整紀錄：派發、預測、辯論、揭曉）+ 裁判記憶（累積戰績）</td></tr>
+      <tr><td>開一局的入口</td><td>桌面 Bots 分頁 → mnq-ref → Bot Chat → 丟截圖說「開新的一局」</td></tr>
+    </table>
+  </div>
+
+  <h2>你的操作總覽</h2>
+  <div class="card">
+    <table>
+      <tr><th>時機</th><th>你做什麼</th><th>等什麼</th></tr>
+      <tr><td>開局</td><td>開盤截圖 → mnq-ref，說「開新的一局」</td><td>裁判回報「預測已定，等結算」（約幾分鐘：兩次平行預測 + 一輪辯論）</td></tr>
+      <tr><td>15–20 分後</td><td>結算截圖（或直接打數字）</td><td>秒級：戰報回來</td></tr>
+      <tr><td>戰報之後</td><td>什麼都不用做</td><td>玩家自動檢討、更新筆記（裁判收尾）</td></tr>
+    </table>
+    <div class="note">
+      ⚠️ 待驗證項：玩家模型對 TradingView 截圖的視覺精度（讀價位、指標位置）尚未實測。第一輪結束後可要求玩家貼出 <code>mnq_strategy.md</code> 內容，確認檢討有真的寫進筆記。
+    </div>
+  </div>
+
+  <p class="footer">MNQ 預測賽局協議 · 由 Hermes Agent 協助建立 · 2026-09-07</p>
+</div>
+</body>
+</html>
